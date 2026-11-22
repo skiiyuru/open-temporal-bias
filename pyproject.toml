@@ -1,0 +1,53 @@
+[project]
+name = "open-temporal-bias"
+version = "0.1.0"
+description = "POC: open-set temporal bias discovery in text-to-video generators (adapted from OpenBias)"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    # models
+    "diffusers>=0.33",            # Wan2.1 T2V pipeline
+    "transformers>=4.51",         # Qwen2.5-Instruct / Qwen2.5-VL
+    "accelerate>=1.0",
+    "bitsandbytes>=0.45",         # optional 4-bit loading (runtime flag)
+    "sentence-transformers>=3.0", # SBERT answer-to-class mapping (OpenBias utils/bert.py)
+    "qwen-vl-utils>=0.0.10",      # frame sampling for Qwen2.5-VL
+    # video I/O
+    "ftfy",
+    "imageio[ffmpeg]",
+    "av",
+    # data and utilities
+    "datasets>=3.0",
+    "huggingface-hub",
+    "numpy",
+    "pandas",
+    "pyyaml",
+    "tqdm",
+    "torch>=2.7",
+    "torchvision>=0.22",
+    "spacy>=3.8.18",
+    "nltk>=3.10.4",
+    "en-core-web-sm",
+]
+
+[tool.uv]
+package = false
+
+# One torch build for both machines: CUDA 12.8 wheels.
+# - laptop RTX 5080 (Blackwell, sm_120): needs >= cu128.
+# - cluster A30 (sm_80, driver 550 = CUDA 12.4): runs 12.8 via CUDA minor-version
+#   compatibility. PyPI's default torch is CUDA 13, which driver 550 cannot run.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128" }]
+torchvision = [{ index = "pytorch-cu128" }]
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+]
